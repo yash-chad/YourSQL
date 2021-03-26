@@ -8,6 +8,15 @@ typedef struct
     ssize_t input_length;
 } InputBuffer;
 
+/*  This is like creating a new data type as MetaCommandResult
+    MetaCommands are the ones that are not SQL commands, they start with a '.'
+*/
+typedef enum
+{
+    META_COMMAND_SUCCESS,
+    META_COMMAND_UNRECOGNIZED_COMMAND
+} MetaCommandResult;
+
 InputBuffer *new_input_buffer()
 {
     InputBuffer *input_buffer = (InputBuffer *)malloc(sizeof(InputBuffer));
@@ -16,10 +25,17 @@ InputBuffer *new_input_buffer()
     return input_buffer;
 }
 
-/* Clear the input buffer after accepting input*/
-void clear_input_buffer(InputBuffer *input_buffer)
+MetaCommandResult do_meta_command(InputBuffer *input_buffer)
 {
-    input_buffer->buffer = "";
+    if (input_buffer->buffer == ".exit")
+    {
+        cout << "Thanks for using YourSQL, Hope to see you again soon!\n";
+        exit(EXIT_SUCCESS);
+    }
+    else
+    {
+        return META_COMMAND_UNRECOGNIZED_COMMAND;
+    }
 }
 
 /* Cleans input string by deleting extra spaces and semicolon*/
@@ -45,7 +61,11 @@ void remove_trailing_spaces(InputBuffer *input_buffer)
 /* Reads input from the cmd*/
 void read_input(InputBuffer *input_buffer)
 {
+
+    /* Clear the input buffer before accepting input*/
+    input_buffer->buffer = "";
     string line = "";
+
     while (getline(cin, line))
     {
         if (line == "")
@@ -74,15 +94,24 @@ int main(int argc, char *argv[])
         print_prompt();
         read_input(input_buffer);
 
-        if (input_buffer->buffer == ".exit")
+        if (input_buffer->buffer.empty())
         {
-            cout << "Thanks for using YourSQL, Hope to see you again soon!\n";
-            exit(0);
+            // The user entered just an empty string
+            continue;
         }
         else
         {
-            cout << "Unrecognized Command " << input_buffer->buffer << endl;
+            if (input_buffer->buffer[0] == '.')
+            {
+                switch (do_meta_command(input_buffer))
+                {
+                case (META_COMMAND_SUCCESS):
+                    continue;
+                case (META_COMMAND_UNRECOGNIZED_COMMAND):
+                    cout << "Unrecognized Command " << input_buffer->buffer << endl;
+                    continue;
+                }
+            }
         }
-        clear_input_buffer(input_buffer);
     }
 }
