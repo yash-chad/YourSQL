@@ -1,4 +1,5 @@
-#include <bits/stdc++.h> // This will be replaces with individual header files later
+#include <iostream>
+#include <string>
 using namespace std;
 
 /* Enums begin */
