@@ -1,13 +1,7 @@
 #include <bits/stdc++.h> // This will be replaces with individual header files later
 using namespace std;
 
-typedef struct
-{
-    string buffer;
-    size_t buffer_length;
-    ssize_t input_length;
-} InputBuffer;
-
+/* Enums begin */
 /*  This is like creating a new data type as MetaCommandResult
     MetaCommands are the ones that are not SQL commands, they start with a '.'
 */
@@ -16,6 +10,63 @@ typedef enum
     META_COMMAND_SUCCESS,
     META_COMMAND_UNRECOGNIZED_COMMAND
 } MetaCommandResult;
+
+typedef enum
+{
+    PREPARE_SUCCESS,
+    PREPARE_UNRECOGNIZED_STATEMENT
+} PrepareResult;
+
+typedef enum
+{
+    STATEMENT_INSERT,
+    STATEMENT_SELECT
+} StatementType;
+/* Enums end*/
+
+/* Structs begin */
+typedef struct
+{
+    string buffer;
+    size_t buffer_length;
+    ssize_t input_length;
+} InputBuffer;
+
+typedef struct
+{
+    StatementType type;
+} Statement;
+/* Structs end */
+
+PrepareResult prepare_statement(InputBuffer *input_buffer,
+                                Statement *statement)
+{
+    if (input_buffer->buffer.substr(0, 6) == "insert")
+    {
+        statement->type = STATEMENT_INSERT;
+        return PREPARE_SUCCESS;
+    }
+    if (input_buffer->buffer.substr(0, 6) == "select")
+    {
+        statement->type = STATEMENT_SELECT;
+        return PREPARE_SUCCESS;
+    }
+
+    return PREPARE_UNRECOGNIZED_STATEMENT;
+}
+
+void execute_statement(Statement *statement)
+{
+    switch (statement->type)
+    {
+    case (STATEMENT_INSERT):
+        printf("This is where we would do an insert.\n");
+        break;
+    case (STATEMENT_SELECT):
+        printf("This is where we would do a select.\n");
+        break;
+    }
+}
 
 InputBuffer *new_input_buffer()
 {
@@ -101,6 +152,7 @@ int main(int argc, char *argv[])
         }
         else
         {
+            /* The command is a meta command */
             if (input_buffer->buffer[0] == '.')
             {
                 switch (do_meta_command(input_buffer))
@@ -108,10 +160,22 @@ int main(int argc, char *argv[])
                 case (META_COMMAND_SUCCESS):
                     continue;
                 case (META_COMMAND_UNRECOGNIZED_COMMAND):
-                    cout << "Unrecognized Command " << input_buffer->buffer << endl;
+                    cout << "Unrecognized Command '" << input_buffer->buffer << "'\n";
                     continue;
                 }
             }
+
+            Statement statement;
+            switch (prepare_statement(input_buffer, &statement))
+            {
+            case (PREPARE_SUCCESS):
+                break;
+            case (PREPARE_UNRECOGNIZED_STATEMENT):
+                cout << "Unrecognized keyword at start of '" << input_buffer->buffer << "'\n";
+                continue;
+            }
+            execute_statement(&statement);
+            printf("Executed.\n");
         }
     }
 }
