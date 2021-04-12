@@ -40,8 +40,8 @@ typedef enum
 typedef struct
 {
     uint32_t id;
-    char username[COLUMN_USERNAME_SIZE];
-    char email[COLUMN_EMAIL_SIZE];
+    char username[COLUMN_USERNAME_SIZE + 1];
+    char email[COLUMN_EMAIL_SIZE + 1];
 } Row;
 
 typedef struct
@@ -110,7 +110,7 @@ Table *new_table()
     }
     return table;
 }
-//TODO=>Freetable
+//TODO Freetable
 InputBuffer *new_input_buffer()
 {
     InputBuffer *input_buffer = (InputBuffer *)malloc(sizeof(InputBuffer));
@@ -133,6 +133,7 @@ MetaCommandResult do_meta_command(InputBuffer *input_buffer, Table *table)
     }
 }
 
+//prepare_statement (our �SQL Compiler�) does not understand SQL right now.
 PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
 {
     if (strncmp(input_buffer->buffer, "insert", 6) == 0)
@@ -157,7 +158,6 @@ PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
     return PREPARE_UNRECOGNIZED_STATEMENT;
 }
 
-//To read line from stdin;
 char *getline(void)
 {
     char *line = (char *)malloc(100), *linep = line;
@@ -187,7 +187,7 @@ char *getline(void)
             linep = linen;
         }
 
-        if ((*line++ = c) == '\n')
+        if ((*line++ = c) == ';')
             break;
     }
     *line = '\0';
@@ -198,6 +198,14 @@ char *getline(void)
 void read_input(InputBuffer *input_buffer)
 {
     input_buffer->buffer = getline();
+    if (input_buffer->buffer[0] == '\n')
+    {
+        input_buffer->buffer++;
+    }
+    while (strlen(input_buffer->buffer) != 0 && (input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ' ' || input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ';'))
+    {
+        input_buffer->buffer[strlen(input_buffer->buffer) - 1] = '\0';
+    }
 }
 
 void print_prompt() { printf("db > "); }
