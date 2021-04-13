@@ -1,4 +1,3 @@
-#include <iostream>
 #include <bits/stdc++.h>
 #define COLUMN_USERNAME_SIZE 32
 #define COLUMN_EMAIL_SIZE 255
@@ -114,9 +113,14 @@ Table *new_table()
 InputBuffer *new_input_buffer()
 {
     InputBuffer *input_buffer = (InputBuffer *)malloc(sizeof(InputBuffer));
-    input_buffer->buffer = "";
+    input_buffer->buffer = NULL;
 
     return input_buffer;
+}
+
+void close_input_buffer(InputBuffer *input_buffer)
+{
+    free(input_buffer);
 }
 
 //Add freeTableCommand
@@ -125,6 +129,7 @@ MetaCommandResult do_meta_command(InputBuffer *input_buffer, Table *table)
     if (strncmp(input_buffer->buffer, ".exit", 5) == 0)
     {
         cout << "Thanks for using YourSQL, Hope to see you again soon!\n";
+        close_input_buffer(input_buffer);
         exit(EXIT_SUCCESS);
     }
     else
@@ -198,7 +203,7 @@ char *getline(void)
 void read_input(InputBuffer *input_buffer)
 {
     input_buffer->buffer = getline();
-    if (input_buffer->buffer[0] == '\n')
+    while (input_buffer->buffer[0] == ' ' || input_buffer->buffer[0] == '\n')
     {
         input_buffer->buffer++;
     }
