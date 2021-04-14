@@ -136,7 +136,7 @@ void deserialize_row(void *source, Row *destination);
 */
 uint32_t *leaf_node_num_cells(void *node)
 {
-    return (uint32_t *)node + LEAF_NODE_NUM_CELLS_OFFSET;
+    return (uint32_t *)(node + LEAF_NODE_NUM_CELLS_OFFSET);
 }
 
 void *leaf_node_cell(void *node, uint32_t cell_num)
@@ -243,17 +243,6 @@ void *get_page(Pager *pager, uint32_t page_num)
 
     return pager->pages[page_num];
 }
-
-// TODO : To be removed
-// void *row_slot(Cursor *cursor)
-// {
-//     uint32_t row_num = cursor->row_num;
-//     uint32_t page_num = row_num / ROWS_PER_PAGE;
-//     void *page = get_page(cursor->table->pager, page_num);
-//     uint32_t row_offset = row_num % ROWS_PER_PAGE;
-//     uint32_t byte_offset = row_offset * ROW_SIZE;
-//     return page + byte_offset;
-// }
 
 Cursor *table_start(Table *table)
 {
