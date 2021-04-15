@@ -144,12 +144,12 @@ uint32_t get_unused_page_num(Pager *pager);
 */
 uint32_t *leaf_node_num_cells(void *node)
 {
-    return (uint32_t *)(node + LEAF_NODE_NUM_CELLS_OFFSET);
+    return (uint32_t *)((char *)node + LEAF_NODE_NUM_CELLS_OFFSET);
 }
 
 void *leaf_node_cell(void *node, uint32_t cell_num)
 {
-    return node + LEAF_NODE_HEADER_SIZE + cell_num * LEAF_NODE_CELL_SIZE;
+    return (char *)node + LEAF_NODE_HEADER_SIZE + cell_num * LEAF_NODE_CELL_SIZE;
 }
 
 uint32_t *leaf_node_key(void *node, uint32_t cell_num)
@@ -159,11 +159,11 @@ uint32_t *leaf_node_key(void *node, uint32_t cell_num)
 
 void *leaf_node_value(void *node, uint32_t cell_num)
 {
-    return leaf_node_cell(node, cell_num) + LEAF_NODE_KEY_SIZE;
+    return (char *)leaf_node_cell((char *)node, cell_num) + LEAF_NODE_KEY_SIZE;
 }
 uint32_t *leaf_node_next_leaf(void *node)
 {
-    return (uint32_t *)(node + LEAF_NODE_NEXT_LEAF_OFFSET);
+    return (uint32_t *)((char *)node + LEAF_NODE_NEXT_LEAF_OFFSET);
 }
 
 void initialize_leaf_node(void *node)
@@ -176,14 +176,14 @@ void initialize_leaf_node(void *node)
 
 bool is_node_root(void *node)
 {
-    uint8_t value = *((uint8_t *)(node + IS_ROOT_OFFSET));
+    uint8_t value = *((uint8_t *)((char *)node + IS_ROOT_OFFSET));
     return (bool)value;
 }
 
 void set_node_root(void *node, bool is_root)
 {
     uint8_t value = is_root;
-    *((uint8_t *)(node + IS_ROOT_OFFSET)) = value;
+    *((uint8_t *)((char *)node + IS_ROOT_OFFSET)) = value;
 }
 
 void initialize_internal_node(void *node)
@@ -192,7 +192,7 @@ void initialize_internal_node(void *node)
     set_node_root(node, false);
     *internal_node_num_keys(node) = 0;
 }
-uint32_t *node_parent(void *node) { return (uint32_t *)(node + PARENT_POINTER_OFFSET); }
+uint32_t *node_parent(void *node) { return (uint32_t *)((char *)node + PARENT_POINTER_OFFSET); }
 
 /*
  * Internal Node Header Layout
@@ -221,17 +221,17 @@ const uint32_t LEAF_NODE_LEFT_SPLIT_COUNT = (LEAF_NODE_MAX_CELLS + 1) - LEAF_NOD
 
 uint32_t *internal_node_num_keys(void *node)
 {
-    return (uint32_t *)(node + INTERNAL_NODE_NUM_KEYS_OFFSET);
+    return (uint32_t *)((char *)node + INTERNAL_NODE_NUM_KEYS_OFFSET);
 }
 
 uint32_t *internal_node_right_child(void *node)
 {
-    return (uint32_t *)(node + INTERNAL_NODE_RIGHT_CHILD_OFFSET);
+    return (uint32_t *)((char *)node + INTERNAL_NODE_RIGHT_CHILD_OFFSET);
 }
 
 uint32_t *internal_node_cell(void *node, uint32_t cell_num)
 {
-    return (uint32_t *)(node + INTERNAL_NODE_HEADER_SIZE + cell_num * INTERNAL_NODE_CELL_SIZE);
+    return (uint32_t *)((char *)node + INTERNAL_NODE_HEADER_SIZE + cell_num * INTERNAL_NODE_CELL_SIZE);
 }
 
 uint32_t *internal_node_child(void *node, uint32_t child_num)
@@ -414,14 +414,14 @@ void *get_page(Pager *pager, uint32_t page_num)
 
 NodeType get_node_type(void *node)
 {
-    uint8_t value = *((uint8_t *)(node + NODE_TYPE_OFFSET));
+    uint8_t value = *((uint8_t *)((char *)node + NODE_TYPE_OFFSET));
     return (NodeType)value;
 }
 
 void set_node_type(void *node, NodeType type)
 {
     uint8_t value = type;
-    *((uint8_t *)(node + NODE_TYPE_OFFSET)) = value;
+    *((uint8_t *)((char *)node + NODE_TYPE_OFFSET)) = value;
 }
 
 /* Finds a particular leaf node */
