@@ -964,7 +964,7 @@ void read_input(InputBuffer *input_buffer)
     {
         input_buffer->buffer++;
     }
-    while (strlen(input_buffer->buffer) != 0 && (input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ' ' || input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ';' || input_buffer->buffer[strlen(input_buffer->buffer) - 1] == '\n'))
+    while (strlen(input_buffer->buffer) != 0 && (input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ' ' || input_buffer->buffer[strlen(input_buffer->buffer) - 1] == ';'))
     {
         input_buffer->buffer[strlen(input_buffer->buffer) - 1] = '\0';
     }
