@@ -18,7 +18,8 @@ typedef enum
 {
     EXECUTE_SUCCESS,
     EXECUTE_TABLE_FULL,
-    EXECUTE_DUPLICATE_KEY
+    EXECUTE_DUPLICATE_KEY,
+    EXECUTE_UNDEFINED_KEY
 } ExecuteResult;
 
 typedef enum
@@ -39,7 +40,9 @@ typedef enum
 typedef enum
 {
     STATEMENT_INSERT,
-    STATEMENT_SELECT
+    STATEMENT_UPDATE,
+    STATEMENT_SELECT,
+
 } StatementType;
 
 typedef enum
@@ -53,12 +56,14 @@ typedef struct
     uint32_t id;
     char username[COLUMN_USERNAME_SIZE + 1];
     char email[COLUMN_EMAIL_SIZE + 1];
+    char key[COLUMN_EMAIL_SIZE + 1];
 } Row;
 
 typedef struct
 {
     StatementType type;
     Row row_to_insert;
+    Row row_to_update;
 } Statement;
 
 // We ask the pager for page number x, and the pager gives us back a block of memory.
@@ -903,6 +908,52 @@ PrepareResult prepare_insert(InputBuffer *input_buffer, Statement *statement)
 
     return PREPARE_SUCCESS;
 }
+PrepareResult prepare_update(InputBuffer *input_buffer, Statement *statement)
+{
+    statement->type = STATEMENT_UPDATE;
+    char *keyword = strtok(input_buffer->buffer, " ");
+    char *id_string = strtok(NULL, " ");
+    char *key = strtok(NULL, " ");
+    char *value = strtok(NULL, " ");
+
+    if (id_string == NULL || key == NULL || value == NULL)
+    {
+        return PREPARE_SYNTAX_ERROR;
+    }
+
+    int id = atoi(id_string);
+    if (id < 0)
+    {
+        return PREPARE_NEGATIVE_ID;
+    }
+
+    if (key == "username" && strlen(value) > COLUMN_USERNAME_SIZE)
+    {
+        return PREPARE_STRING_TOO_LONG;
+    }
+    if (key == "email" && strlen(value) > COLUMN_EMAIL_SIZE)
+    {
+        return PREPARE_STRING_TOO_LONG;
+    }
+
+    statement->row_to_update.id = id;
+    // strcpy(statement->row_to_update.key, value);
+    //if (strncmp(key, "username", 8))
+    //{
+    strcpy(statement->row_to_update.username, value);
+    strcpy(statement->row_to_update.email, "");
+    //}
+
+    /*else
+    {
+        cout << key << endl;
+        cout << strncmp(key, "username", 8) << endl;
+        strcpy(statement->row_to_update.username, "");
+        strcpy(statement->row_to_update.email, value);
+    }*/
+
+    return PREPARE_SUCCESS;
+}
 
 //prepare_statement (our �SQL Compiler�) does not understand SQL right now.
 PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
@@ -910,6 +961,10 @@ PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
     if (strncmp(input_buffer->buffer, "insert", 6) == 0)
     {
         return prepare_insert(input_buffer, statement);
+    }
+    if (strncmp(input_buffer->buffer, "update", 6) == 0)
+    {
+        return prepare_update(input_buffer, statement);
     }
     if (strncmp(input_buffer->buffer, "select", 6) == 0)
     {
@@ -995,6 +1050,35 @@ ExecuteResult execute_insert(Statement *statement, Table *table)
     return EXECUTE_SUCCESS;
 }
 
+ExecuteResult execute_update(Statement *statement, Table *table)
+{
+    void *node = get_page(table->pager, table->root_page_num);
+    uint32_t num_cells = (*leaf_node_num_cells(node));
+    Row *row_to_update = &(statement->row_to_update);
+    uint32_t id_to_update = row_to_update->id;
+    Cursor *cursor = table_find(table, id_to_update);
+    if (cursor->cell_num < num_cells)
+    {
+        uint32_t key_at_index = *leaf_node_key(node, cursor->cell_num);
+        Row row;
+        if (key_at_index == id_to_update)
+        {
+            deserialize_row(cursor_value(cursor), &row);
+            strcpy(statement->row_to_update.email, row.email);
+
+            //cout << *leaf_node_value(node, cursor->cell_num) << endl;
+            //cout << row.username << endl;
+            //Row *row2 = &row;
+            // row2->email = row_to_update->key;
+            //
+            serialize_row(row_to_update, leaf_node_value(node, cursor->cell_num));
+        }
+        return EXECUTE_SUCCESS;
+    }
+    else
+        return EXECUTE_UNDEFINED_KEY;
+}
+
 ExecuteResult execute_select(Statement *statement, Table *table)
 {
     Cursor *cursor = table_start(table);
@@ -1018,6 +1102,8 @@ ExecuteResult execute_statement(Statement *statement, Table *table)
     //This is where insertion would take place.
     case (STATEMENT_INSERT):
         return execute_insert(statement, table);
+    case (STATEMENT_UPDATE):
+        return execute_update(statement, table);
     //This is selection would take place.
     case (STATEMENT_SELECT):
         return execute_select(statement, table);
