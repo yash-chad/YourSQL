@@ -937,20 +937,17 @@ PrepareResult prepare_update(InputBuffer *input_buffer, Statement *statement)
     }
 
     statement->row_to_update.id = id;
-    // strcpy(statement->row_to_update.key, value);
-    //if (strncmp(key, "username", 8))
-    //{
-    strcpy(statement->row_to_update.username, value);
-    strcpy(statement->row_to_update.email, "");
-    //}
-
-    /*else
+    if (strncmp(key, "username", 8) == 0)
     {
-        cout << key << endl;
-        cout << strncmp(key, "username", 8) << endl;
+        strcpy(statement->row_to_update.username, value);
+        strcpy(statement->row_to_update.email, "");
+    }
+
+    else
+    {
         strcpy(statement->row_to_update.username, "");
         strcpy(statement->row_to_update.email, value);
-    }*/
+    }
 
     return PREPARE_SUCCESS;
 }
@@ -1064,13 +1061,14 @@ ExecuteResult execute_update(Statement *statement, Table *table)
         if (key_at_index == id_to_update)
         {
             deserialize_row(cursor_value(cursor), &row);
-            strcpy(statement->row_to_update.email, row.email);
-
-            //cout << *leaf_node_value(node, cursor->cell_num) << endl;
-            //cout << row.username << endl;
-            //Row *row2 = &row;
-            // row2->email = row_to_update->key;
-            //
+            if (strlen(statement->row_to_update.email) == 0)
+            {
+                strcpy(statement->row_to_update.email, row.email);
+            }
+            if (strlen(statement->row_to_update.username) == 0)
+            {
+                strcpy(statement->row_to_update.username, row.username);
+            }
             serialize_row(row_to_update, leaf_node_value(node, cursor->cell_num));
         }
         return EXECUTE_SUCCESS;
