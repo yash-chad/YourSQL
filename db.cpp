@@ -369,6 +369,7 @@ void deserialize_row(void *source, Row *destination)
     memcpy(&(destination->email), source + EMAIL_OFFSET, EMAIL_SIZE);
 }
 
+//It returns the page using the page number, First checks the page cache, else reads from the file
 void *get_page(Pager *pager, uint32_t page_num)
 {
     if (page_num > TABLE_MAX_PAGES)
@@ -715,6 +716,7 @@ void *cursor_value(Cursor *cursor)
     return leaf_node_value(page, cursor->cell_num);
 }
 
+//Creates a new Pager object and initializes it with NULL values
 Pager *pager_open(const char *filename)
 {
     int fd = open(filename,
