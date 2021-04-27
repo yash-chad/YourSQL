@@ -64,6 +64,7 @@ typedef struct
     StatementType type;
     Row row_to_insert;
     Row row_to_update;
+    Row row_to_select;
 } Statement;
 
 // We ask the pager for page number x, and the pager gives us back a block of memory.
@@ -747,7 +748,6 @@ Pager *pager_open(const char *filename)
         printf("Db file is not a whole number of pages. Corrupt file.\n");
         exit(EXIT_FAILURE);
     }
-
     for (uint32_t i = 0; i < TABLE_MAX_PAGES; i++)
     {
         pager->pages[i] = NULL;
@@ -952,6 +952,36 @@ PrepareResult prepare_update(InputBuffer *input_buffer, Statement *statement)
     return PREPARE_SUCCESS;
 }
 
+PrepareResult prepare_select(InputBuffer *input_buffer, Statement *statement)
+{
+    statement->type = STATEMENT_SELECT;
+    char *keyword = strtok(input_buffer->buffer, " ");
+    char *parameter = strtok(NULL, " ");
+    char *key = strtok(NULL, " ");
+    char *id_para = strtok(NULL, " ");
+    char *id_string = strtok(NULL, " ");
+
+    if (parameter == NULL)
+    {
+        statement->row_to_select.id = NULL;
+        return PREPARE_SUCCESS;
+    }
+    if (id_string == NULL || key == NULL || id_para == NULL || parameter == NULL)
+    {
+        return PREPARE_SYNTAX_ERROR;
+    }
+
+    int id = atoi(id_string);
+
+    if (id < 0)
+    {
+        return PREPARE_NEGATIVE_ID;
+    }
+    statement->row_to_select.id = id;
+    strcpy(statement->row_to_select.key, parameter);
+    return PREPARE_SUCCESS;
+}
+
 //prepare_statement (our �SQL Compiler�) does not understand SQL right now.
 PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
 {
@@ -965,8 +995,7 @@ PrepareResult prepare_statement(InputBuffer *input_buffer, Statement *statement)
     }
     if (strncmp(input_buffer->buffer, "select", 6) == 0)
     {
-        statement->type = STATEMENT_SELECT;
-        return PREPARE_SUCCESS;
+        return prepare_select(input_buffer, statement);
     }
 
     return PREPARE_UNRECOGNIZED_STATEMENT;
@@ -1079,16 +1108,53 @@ ExecuteResult execute_update(Statement *statement, Table *table)
 
 ExecuteResult execute_select(Statement *statement, Table *table)
 {
-    Cursor *cursor = table_start(table);
-
-    Row row;
-    while (!(cursor->end_of_table))
+    if (statement->row_to_select.id == NULL)
     {
-        deserialize_row(cursor_value(cursor), &row);
-        print_row(&row);
-        cursor_advance(cursor);
+        Cursor *cursor = table_start(table);
+        Row row;
+        while (!(cursor->end_of_table))
+        {
+            deserialize_row(cursor_value(cursor), &row);
+            print_row(&row);
+            cursor_advance(cursor);
+        }
+        free(cursor);
     }
-    free(cursor);
+    else
+    {
+        void *node = get_page(table->pager, table->root_page_num);
+        uint32_t num_cells = (*leaf_node_num_cells(node));
+        Row *row_to_select = &(statement->row_to_select);
+        uint32_t id_to_select = row_to_select->id;
+        Cursor *cursor = table_find(table, id_to_select);
+        if (cursor->cell_num < num_cells)
+        {
+            uint32_t key_at_index = *leaf_node_key(node, cursor->cell_num);
+            Row row;
+            if (key_at_index == id_to_select)
+            {
+
+                deserialize_row(cursor_value(cursor), &row);
+
+                if (strcmp(row_to_select->key, "email") == 0)
+                {
+                    cout << row.email << endl;
+                }
+                else if (strcmp(row_to_select->key, "username") == 0)
+                {
+                    cout << row.username << endl;
+                }
+                else
+                {
+                    print_row(&row);
+                }
+            }
+            return EXECUTE_SUCCESS;
+        }
+        else
+            return EXECUTE_UNDEFINED_KEY;
+    }
+
     return EXECUTE_SUCCESS;
 }
 
