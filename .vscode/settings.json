@@ -1,5 +1,13 @@
 {
     "files.associations": {
-        "xstring": "cpp"
-    }
+        "xstring": "cpp",
+        ".exe": "executable",
+        "ostream": "cpp",
+        "iostream": "cpp"
+    },
+    "code-runner.runInTerminal": true,
+    "C_Cpp.commentContinuationPatterns": [
+    
+        "/**"
+    ]
 }
