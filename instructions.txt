@@ -1,4 +1,4 @@
 Make sure you have g++ instaled on your machine.
 
 Compile the db file : g++ db.cpp
-Then start a database connection by using the command : ./a.exe  
+Then start a database connection by using the command : ./a.exe mydb.db
