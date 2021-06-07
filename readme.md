@@ -13,7 +13,7 @@
   <h2 align="center">YourSQL!</h2>
 
   <p align="center">
-    An in-process DBMS that implements a self-contained, minimal-configuration, transactional SQL database engine!
+    An in-process DBMS that implements a self-contained, minimal-configuration, SQL database engine!
     <br />
     <a href="https://github.com/yash-chad/YourSQL"><strong>Explore the docs »</strong></a>
     <br />
