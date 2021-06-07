@@ -33,24 +33,24 @@
     <li>
       <a href="#about-the-project-white_check_mark">About The Project</a>
        <ul>
-        <li><a href="#working-💻">Working</a></li>
+        <li><a href="#working-computer">Working</a></li>
       </ul>
        <ul>
-        <li><a href="#built-with-🔨">Built with</a></li>
+        <li><a href="#built-with-hammer">Built with</a></li>
       </ul>
       <ul>
-        <li><a href="#architecture-👷">Architecture</a></li>
+        <li><a href="#architecture-construction_worker">Architecture</a></li>
       </ul>
     </li>
     <li>
-      <a href="#getting-started-💥">Getting Started</a>
+      <a href="#getting-started-boom">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#contributing-🤝">Contributing</a></li>
-    <li><a href="#developed-with-❤️-by">Developed with ❤️ by</a></li>
+    <li><a href="#contributing-handshake">Contributing</a></li>
+    <li><a href="#developed-with-heart-by">Developed with ❤️ by</a></li>
 
   </ol>
 </details>
