@@ -31,7 +31,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project-✅">About The Project</a>
+      <a href="#about-the-project-white_check_mark">About The Project</a>
        <ul>
         <li><a href="#working-💻">Working</a></li>
       </ul>
