@@ -7,7 +7,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/yash-chad/YourSQL/">
-    <img src="https://raw.githubusercontent.com/yash-chad/YourSQL/main/assets/YourSQL_Logo.png?token=AMQ4GV2SBEC5UIQTG735TZ3AXYCA2" alt="Logo" width="200" height="200">
+    <img src="https://github.com/yash-chad/YourSQL/blob/main/assets/YourSQL_Logo.png?raw=true" alt="Logo" width="200" height="200">
   </a>
 
   <h2 align="center">YourSQL!</h2>
